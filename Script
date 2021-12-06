@@ -11,7 +11,8 @@ Write-Host "3. Create New AD OU                         "
 Write-Host "                                            "
 Write-Host "4. Create New AD Computer                   "
 Write-Host "                                            "
-Write-Host "X Exit The Menu                             "
+Write-Host "X. Exit The Menu                            "
+Write-Host "                                            "
 
 $choice = Read-Host  "Enter selection"
 switch ($choice) {
@@ -107,11 +108,12 @@ switch ($choice) {
       "4" {
       Write-Host "NEW AD Computer Name " -ForegroundColor Green
       $name = Read-Host -Prompt "Enter the name"
-      $SamAccountName = $name
       #path = ou=....,dc=...,dc=com or root put dc=...,dc=com
-      $path= Read-Host -Prompt "Enter the path "
+      $path = Read-Host -Prompt "Enter the path "
+      $server = Read-Host -Prompt "Enter the server "
+      $samaccountname = $name
       
-        if (Get-ADComputer -f {name = $name})
+        if (Get-ADComputer -f {name -eq $name})
         {
             #is group exist already
             Write-warning " A Organizational Unit named $name Already exist"
@@ -119,7 +121,7 @@ switch ($choice) {
         else
         {
             #If no OU exist Create the OU
-            NEW-ADcomputer -name $name -SAMAccountName $name –path $path
+            NEW-ADcomputer -enabled $true -name "$name" –path "$path" -SAMAccountName "$samaccountname" -Server "$server"
             }
         }
 
@@ -131,3 +133,6 @@ switch ($choice) {
             }
 }
 }
+
+
+
