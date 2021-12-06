@@ -1,0 +1,133 @@
+$continue = $true
+while($continue){
+Write-Host "============================================"
+Write-Host "             Create AD Objects              "
+Write-Host "                                            "
+Write-Host "1. Create New AD User Account from CSV      "
+Write-Host "                                            "
+Write-Host "2. Create New AD Group from CSV             "
+Write-Host "                                            "
+Write-Host "3. Create New AD OU                         "
+Write-Host "                                            "
+Write-Host "4. Create New AD Computer                   "
+Write-Host "                                            "
+Write-Host "X Exit The Menu                             "
+
+$choice = Read-Host  "Enter selection"
+switch ($choice) {
+    "1" {
+    Write-Host $ADUsers = Import-csv 
+
+    foreach ($User in $ADUsers)
+    {
+
+       $Username    = $User.username
+       $Password    = $User.password
+       $Firstname   = $User.firstname
+       $Lastname    = $User.lastname
+       $Department  = $User.department
+       $OU          = $User.ou
+
+       #Check if the user account already exists in AD
+       if (Get-ADUser -F {SamAccountName -eq $Username})
+       {
+        #If user does exist, output a warning message
+        Write-Warning "A user account $Username has already exist in Active Directory."
+       }
+       else
+       {
+        #If a user does not exist then create a new user account
+          
+        #Account will be created in the OU listed in the $OU variable in the CSV file; don’t forget to change the domain name in the"-UserPrincipalName" variable
+            New-ADUser `
+            -SamAccountName $Username `
+            -UserPrincipalName "$Username@yourdomain.com" `
+            -Name "$Firstname $Lastname" `
+            -GivenName $Firstname `
+            -Surname $Lastname `
+            -Enabled $True `
+            -ChangePasswordAtLogon $True `
+            -DisplayName "$Lastname, $Firstname" `
+            -Department $Department `
+            -Path $OU `
+            -AccountPassword (convertto-securestring $Password -AsPlainText -Force)
+
+            }
+         }
+       }
+    
+
+      "2" {
+      Write-host $MyGroups = Import-csv 
+
+      foreach ($User in $ADUsers)
+      {
+
+        $Path         = $Group.Path
+        $Name         = $Group.Name
+        $Scope        = $Group.Scope
+        $Category     = $Group.Category
+        $Description  = $Group.Description
+        $Info         = $Group.Info
+
+        #Check if the user account already exists in AD
+        if (Get-ADgroup -F {Groupname -eq $Name})
+        {
+            #If user does exist, output a warning message
+            Write-Warning "A Group with the $Name already exist in Active Directory."
+        }
+        else
+        {
+            #If a user does not exist then create a new group
+             New-ADGroup -Path $Path -Name $Name -GroupScope $Scope -GroupCategory $Catego -Description $Description -OtherAttributes @{info=($Info)}
+            }
+         }
+       }
+   
+
+      "3" {
+      Write-Host "New AD Org Name" -ForegroundColor Green
+      $name= Read-Host -Prompt "Enter the name"
+      #path = ou=....,dc=...,dc=com or root put dc=...,dc=com
+      $path= Read-Host -Prompt "Enter the path "
+      
+        if (Get-ADOrganizationalUnit -f {name -eq $name})
+        {
+            #is group exist already
+            Write-warning " A Organizational Unit named $name Already exist"
+        }
+        else
+        {
+            #If no OU exist Create the OU
+            NEW-ADOrganizationalUnit -name $name –path $path
+            }
+        }
+
+
+      "4" {
+      Write-Host "NEW AD Computer Name " -ForegroundColor Green
+      $name = Read-Host -Prompt "Enter the name"
+      $SamAccountName = $name
+      #path = ou=....,dc=...,dc=com or root put dc=...,dc=com
+      $path= Read-Host -Prompt "Enter the path "
+      
+        if (Get-ADComputer -f {name = $name})
+        {
+            #is group exist already
+            Write-warning " A Organizational Unit named $name Already exist"
+        }
+        else
+        {
+            #If no OU exist Create the OU
+            NEW-ADcomputer -name $name -SAMAccountName $name –path $path
+            }
+        }
+
+      "X" {
+                    $continue = $false
+            }
+            default {
+            Write-Host "'n'n ** Unknown Selection **" -ForegroundColor red -BackgroundColor white
+            }
+}
+}
