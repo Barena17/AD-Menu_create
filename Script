@@ -17,7 +17,8 @@ Write-Host "                                            "
 $choice = Read-Host  "Enter selection"
 switch ($choice) {
     "1" {
-    Write-Host $ADUsers = Import-csv 
+    $path = Read-Host -Prompt "Enter the path of csv "
+    Write-Host $ADUsers = Import-csv $path
 
     foreach ($User in $ADUsers)
     {
@@ -59,7 +60,8 @@ switch ($choice) {
     
 
       "2" {
-      Write-host $MyGroups = Import-csv 
+      $path = Read-Host -Prompt "Enter the path of csv "
+      Write-host $MyGroups = Import-csv $path
 
       foreach ($User in $ADUsers)
       {
@@ -133,6 +135,3 @@ switch ($choice) {
             }
 }
 }
-
-
-
